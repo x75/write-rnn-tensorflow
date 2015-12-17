@@ -46,6 +46,15 @@ def sample_stroke():
   draw_strokes_pdf(strokes, params, factor=sample_args.scale_factor, svg_filename = sample_args.filename+'.pdf.svg')
   return [strokes, params]
 
-[strokes, params] = sample_stroke()
+def sample_waves():
+  [strokes, params] = model.sample(sess, sample_args.sample_length)
+  return [strokes, params]
+    
 
+# [strokes, params] = sample_stroke()
+[strokes, params] = sample_waves()
+print type(strokes), strokes.shape #, type(params), params
 
+from scipy.io import wavfile
+print(np.max(strokes[:,0:2]), np.min(strokes[:,0:2]))
+wavfile.write("explorers_MP3WRAP_sample.wav", 44100, strokes[:,0:2]/65535.)

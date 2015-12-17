@@ -160,7 +160,7 @@ def draw_strokes_pdf(data, param, factor=10, svg_filename = 'sample_pdf.svg'):
 
 class DataLoader():
   def __init__(self, batch_size=50, seq_length=300, scale_factor = 10, limit = 500):
-    self.data_dir = "./data"
+    self.data_dir = "./data_wav"
     self.batch_size = batch_size
     self.seq_length = seq_length
     self.scale_factor = scale_factor # divide data by this factor

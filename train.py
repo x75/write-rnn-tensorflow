@@ -41,7 +41,7 @@ def main():
   train(args)
 
 def train(args):
-    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale)
+    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale, limit=32768.)
 
     with open(os.path.join('save', 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
@@ -58,6 +58,9 @@ def train(args):
             for b in xrange(data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
+                for i in range(len(x)):
+                    print np.min(x[i]), np.max(x[i]), np.min(y[i]), np.max(y[i])
+                    # print len(x), len(y), np.min(x[0]), np.max(x[0]), np.min(y[0]), np.max([y])
                 feed = {model.input_data: x, model.target_data: y, model.initial_state: state}
                 train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
                 end = time.time()

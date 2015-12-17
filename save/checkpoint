@@ -1,2 +1,6 @@
-model_checkpoint_path: "save/model.ckpt-0"
-all_model_checkpoint_paths: "save/model.ckpt-0"
+model_checkpoint_path: "save/model.ckpt-7000"
+all_model_checkpoint_paths: "save/model.ckpt-5000"
+all_model_checkpoint_paths: "save/model.ckpt-5500"
+all_model_checkpoint_paths: "save/model.ckpt-6000"
+all_model_checkpoint_paths: "save/model.ckpt-6500"
+all_model_checkpoint_paths: "save/model.ckpt-7000"

@@ -18,6 +18,7 @@ class Model():
       cell_fn = rnn_cell.GRUCell
     elif args.model == 'lstm':
       cell_fn = rnn_cell.BasicLSTMCell
+      # cell_fn = rnn_cell.LSTMCell
     else:
       raise Exception("model type not supported: {}".format(args.model))
 
