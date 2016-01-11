@@ -3,11 +3,12 @@ import tensorflow as tf
 
 import argparse
 import time
-import os
+import os, sys
 import cPickle
 
 from utils import DataLoader
 from model import Model
+from modela import Model2Df
 
 def main():
   parser = argparse.ArgumentParser()
@@ -17,6 +18,8 @@ def main():
                      help='number of layers in the RNN')
   parser.add_argument('--model', type=str, default='lstm',
                      help='rnn, gru, or lstm')
+  parser.add_argument('--modelfile', type=str, default=None,
+                     help='Load a model file')
   parser.add_argument('--batch_size', type=int, default=50,
                      help='minibatch size')
   parser.add_argument('--seq_length', type=int, default=300,
@@ -37,20 +40,35 @@ def main():
                      help='factor to scale raw data down by')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
+  parser.add_argument("--supmodel", default="2D")
   args = parser.parse_args()
   train(args)
 
 def train(args):
+    print "loading data"
     data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale, limit=32768.)
 
     with open(os.path.join('save', 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
 
-    model = Model(args)
+    print "creating model %s" % args.supmodel
+    if args.supmodel == "2Deos":
+        model = Model(args)
+    elif args.supmodel == "2D":
+        model = Model2Df(args)
+    else:
+        print "unknown supmodel"
+        sys.exit()
 
+    # import pylab as pl
+    print "starting run"
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
-        saver = tf.train.Saver(tf.all_variables())
+        saver = tf.train.Saver(tf.all_variables(), max_to_keep = 100)
+        if args.modelfile != None:
+            print "Loading model from checkpoint %s" % (args.modelfile)
+            saver.restore(sess, args.modelfile)
+        train_losses = []
         for e in xrange(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
@@ -58,20 +76,27 @@ def train(args):
             for b in xrange(data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
-                for i in range(len(x)):
-                    print np.min(x[i]), np.max(x[i]), np.min(y[i]), np.max(y[i])
+                # pl.plot(x[0])
+                # pl.plot(y[0])
+                # pl.show()
+                # for i in range(len(x)):
+                    # print "min, max xy", np.min(x[i]), np.max(x[i]), np.min(y[i]), np.max(y[i])
                     # print len(x), len(y), np.min(x[0]), np.max(x[0]), np.min(y[0]), np.max([y])
                 feed = {model.input_data: x, model.target_data: y, model.initial_state: state}
                 train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
                 end = time.time()
+                # print
+                train_losses.append(train_loss)
                 print "{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
                     .format(e * data_loader.num_batches + b,
                             args.num_epochs * data_loader.num_batches,
                             e, train_loss, end - start)
                 if (e * data_loader.num_batches + b) % args.save_every == 0 and ((e * data_loader.num_batches + b) > 0):
+                    print "min, max xy", np.min(x[-1]), np.max(x[-1]), np.min(y[-1]), np.max(y[-1])
                     checkpoint_path = os.path.join('save', 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
+        np.save("save/train_losses.npy", np.asarray(train_losses))
 
 if __name__ == '__main__':
   main()
