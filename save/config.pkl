@@ -16,7 +16,7 @@ p7
 F10
 sS'rnn_size'
 p8
-I100
+I200
 sS'data_scale'
 p9
 F32768
@@ -37,13 +37,13 @@ p14
 I1
 sS'batch_size'
 p15
-I20
+I50
 sS'num_layers'
 p16
 I1
 sS'model'
 p17
-S'lstmp'
+S'lstm'
 p18
 sS'supmodel'
 p19
@@ -54,5 +54,5 @@ p21
 I100
 sS'keep_prob'
 p22
-F0.98999999999999999
+F1
 sb.

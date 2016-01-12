@@ -23,11 +23,17 @@ class Model2Df(): # two-dimensional data (stereo), float
       cell_fn = rnn_cell.BasicLSTMCell
     elif args.model == "lstmp":
       cell_fn = rnn_cell.LSTMCell
+    elif args.model == "cw":
+      cell_fn = rnn_cell.CWRNNCell
     else:
       raise Exception("model type not supported: {}".format(args.model))
 
     if args.model == "lstmp":
       cell = cell_fn(args.rnn_size, self.dim, use_peepholes=True, num_proj=args.rnn_size)
+    if args.model == "lstm":
+      cell = cell_fn(args.rnn_size, forget_bias = 5.0)
+    elif args.model == "cw":
+      cell = cell_fn(args.rnn_size, [1, 4, 16, 64])
     else:
       cell = cell_fn(args.rnn_size)
 
@@ -85,7 +91,7 @@ class Model2Df(): # two-dimensional data (stereo), float
       epsilon = 1e-20
       result1 = tf.mul(result0, z_pi)
       result1 = tf.reduce_sum(result1, 1, keep_dims=True)
-      result1 = -tf.log(tf.maximum(result1, 1e-20)) # at the beginning, some errors are exactly zero.
+      result1 = -tf.log(tf.maximum(result1, epsilon)) # at the beginning, some errors are exactly zero.
 
       # result2 = tf.mul(z_eos, eos_data) + tf.mul(1-z_eos, 1-eos_data)
       # result2 = -tf.log(result2)
