@@ -284,7 +284,7 @@ class DataLoader():
       x_batch.append(np.copy(data[idx:idx+self.seq_length]))
       y_batch.append(np.copy(data[idx+1:idx+self.seq_length+1]))
       if random.random() < (1.0/float(n_batch)): # adjust sampling probability.
-        #if this is a long datapoint, sample this data more with higher probability
+        # if this is a long datapoint, sample this data more with higher probability
         self.tick_batch_pointer()
     return x_batch, y_batch
 
