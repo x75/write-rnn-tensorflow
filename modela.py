@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.models.rnn import rnn_cell
+from tensorflow.models.rnn import rnn_cell, rnn
 from tensorflow.models.rnn import seq2seq
 
 import numpy as np
@@ -30,7 +30,7 @@ class Model2Df(): # two-dimensional data (stereo), float
 
     if args.model == "lstmp":
       cell = cell_fn(args.rnn_size, self.dim, use_peepholes=True, num_proj=args.rnn_size)
-    if args.model == "lstm":
+    elif args.model == "lstm":
       cell = cell_fn(args.rnn_size, forget_bias = 5.0)
     elif args.model == "cw":
       cell = cell_fn(args.rnn_size, [1, 4, 16, 64])
@@ -59,6 +59,7 @@ class Model2Df(): # two-dimensional data (stereo), float
     inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
     outputs, states = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=None, scope='rnnlm')
+    # outputs, states = rnn.rnn(cell, inputs, self.initial_state, sequence_length = args.seq_length, scope='rnnlm')
     output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
     output = tf.nn.xw_plus_b(output, output_w, output_b)
     self.final_state = states[-1]

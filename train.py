@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import pylab as pl
 
 import argparse
 import time
@@ -41,12 +42,13 @@ def main():
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
   parser.add_argument("--supmodel", default="2D")
+  parser.add_argument("--datafile", type=str, default=None)
   args = parser.parse_args()
   train(args)
 
 def train(args):
     print "loading data"
-    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale, limit=32768.)
+    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale, limit=32768., datafilename = args.datafile)
 
     with open(os.path.join('save', 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
@@ -65,11 +67,14 @@ def train(args):
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables(), max_to_keep = 100)
+        offset_epochs = 0
         if args.modelfile != None:
             print "Loading model from checkpoint %s" % (args.modelfile)
             saver.restore(sess, args.modelfile)
+            offset_epochs = int(args.modelfile.split("-")[-1])/data_loader.num_batches
+            print "Setting epoch pointers to %d - %d" % (offset_epochs, offset_epochs+args.num_epochs)
         train_losses = []
-        for e in xrange(args.num_epochs):
+        for e in xrange(offset_epochs, offset_epochs+args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
             state = model.initial_state.eval()
@@ -89,13 +94,15 @@ def train(args):
                 train_losses.append(train_loss)
                 print "{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
                     .format(e * data_loader.num_batches + b,
-                            args.num_epochs * data_loader.num_batches,
+                            (offset_epochs + args.num_epochs) * data_loader.num_batches,
                             e, train_loss, end - start)
                 if (e * data_loader.num_batches + b) % args.save_every == 0 and ((e * data_loader.num_batches + b) > 0):
                     print "min, max xy", np.min(x[-1]), np.max(x[-1]), np.min(y[-1]), np.max(y[-1])
                     checkpoint_path = os.path.join('save', 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
+        pl.plot(train_losses)
+        pl.show()
         np.save("save/train_losses.npy", np.asarray(train_losses))
 
 if __name__ == '__main__':
