@@ -159,14 +159,18 @@ def draw_strokes_pdf(data, param, factor=10, svg_filename = 'sample_pdf.svg'):
 
 
 class DataLoader():
-  def __init__(self, batch_size=50, seq_length=300, scale_factor = 10, limit = 500):
+  def __init__(self, batch_size=50, seq_length=300, scale_factor = 10, limit = 500, datafilename=None):
     self.data_dir = "./data_wav"
     self.batch_size = batch_size
     self.seq_length = seq_length
     self.scale_factor = scale_factor # divide data by this factor
     self.limit = limit # removes large noisy gaps in the data
 
-    data_file = os.path.join(self.data_dir, "strokes_training_data.cpkl")
+    if datafilename == None:
+        data_file = os.path.join(self.data_dir, "strokes_training_data.cpkl")
+    else:
+        data_file = datafilename
+        
     raw_data_dir = self.data_dir+"/lineStrokes"
 
     if not (os.path.exists(data_file)) :
@@ -252,6 +256,7 @@ class DataLoader():
 
 
   def load_preprocessed(self, data_file):
+    print "loading data from %s" % data_file
     f = open(data_file,"rb")
     self.raw_data = cPickle.load(f)
     f.close()

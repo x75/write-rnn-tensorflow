@@ -66,4 +66,6 @@ print type(strokes), strokes.shape #, type(params), params
 from scipy.io import wavfile
 print(np.max(strokes[:,0:2]), np.min(strokes[:,0:2]))
 # wavfile.write("explorers_MP3WRAP_sample.wav", 44100, strokes[:,0:2]/65535.)
-wavfile.write("notypeinst_sample_%s.wav" % (time.strftime("%Y%m%d-%H%M%S")), 44100, strokes[:,0:2]/sample_args.scale_factor)
+wavname = "notypeinst_sample_%s.wav" % (time.strftime("%Y%m%d-%H%M%S"))
+print "saving %s" % wavname
+wavfile.write(wavname, 44100, strokes[:,0:2]/sample_args.scale_factor)

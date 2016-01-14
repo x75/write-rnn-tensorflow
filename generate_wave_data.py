@@ -11,13 +11,17 @@ def gen_data(length=100):
     t = np.linspace(0, length, length, endpoint=False)
     s = np.zeros_like(t)
     for i in range(2):
-        s += np.sin(t * ((0.01*i) + np.random.uniform(-0.01, 0.01)))
+        s += np.sin(t * ((0.5*i) + np.random.uniform(-0.01, 0.01)))
     return 0.5 * s/np.max(np.abs(s))
 
 def main(args):
+    stereo = True # False
     s = gen_data(args.length).astype(np.float32)
     print(s.shape)
-    s_s = np.vstack((s, s)).T
+    if stereo:
+        s_s = np.vstack((s, s)).T
+    else:
+        s_s = s
     s_s_int = (s_s * 32767).astype(np.int16)
     print(s_s.shape, s_s_int.shape)
     pl.subplot(211)
@@ -25,7 +29,7 @@ def main(args):
     pl.subplot(212)
     pl.plot(s_s_int)
     pl.show()
-    wavfile.write("mso2.wav", 44100, s_s_int)
+    wavfile.write("mso5s.wav", 44100, s_s_int)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
