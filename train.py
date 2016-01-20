@@ -10,6 +10,7 @@ import cPickle
 from utils import DataLoader
 from model import Model
 from modela import Model2Df
+from modelb import ModelNDf
 
 def main():
   parser = argparse.ArgumentParser()
@@ -58,6 +59,7 @@ def train(args):
         model = Model(args)
     elif args.supmodel == "2D":
         model = Model2Df(args)
+        # model = ModelNDf(args)
     else:
         print "unknown supmodel"
         sys.exit()

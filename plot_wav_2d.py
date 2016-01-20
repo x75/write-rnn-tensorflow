@@ -14,7 +14,8 @@ def pl2d(d):
     pl.show()
 
 def pl1d(d):
-    pl.plot(d)
+    span = min(d.shape[0], 4410)
+    pl.plot(d[:span])
     pl.show()
 
 if __name__ == "__main__":

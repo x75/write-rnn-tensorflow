@@ -10,9 +10,11 @@ import cPickle
 def gen_data(length=100):
     t = np.linspace(0, length, length, endpoint=False)
     s = np.zeros_like(t)
-    for i in range(2):
-        s += np.sin(t * ((0.5*i) + np.random.uniform(-0.01, 0.01)))
-    return 0.5 * s/np.max(np.abs(s))
+    Ncomp = 2
+    for i in range(Ncomp):
+        # s += np.sin(t * ((0.5*i) + np.random.uniform(-0.01, 0.01)))
+        s += np.sin(t * (0.1*(i+1)))
+    return (1./Ncomp) * s/np.max(np.abs(s))
 
 def main(args):
     stereo = True # False
@@ -29,7 +31,7 @@ def main(args):
     pl.subplot(212)
     pl.plot(s_s_int)
     pl.show()
-    wavfile.write("mso5s.wav", 44100, s_s_int)
+    wavfile.write("mso6s.wav", 44100, s_s_int)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
