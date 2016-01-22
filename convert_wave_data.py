@@ -15,13 +15,14 @@ def main_mono(args):
 
     rate, data = wavfile.read("%s.wav" % dfile)
 
-    print(data.shape)
+    print("rate", rate, "data.shape", data.shape)
 
     seqs = []
     si = 0 # sample index
+    incr = rate/10
     while si < data.shape[0]:
         # print("si = %d" % si)
-        incr = int(np.random.normal(1000, 50))
+        # incr = int(np.random.normal(1000, 50))
         # check
         if incr < 100:
             print("too short %d" % incr)
@@ -51,17 +52,28 @@ def main_stereo(args):
 
     rate, data = wavfile.read("%s.wav" % dfile)
 
-    print(data.shape)
+    print("data.shape", data.shape)
+    if len(data.shape) < 2:
+        # print("mono input?")
+        data = np.vstack((data, data)).T
 
-    print(data.dtype)
-    print(np.min(data), np.max(data))
-    
+    print("data.shape", data.shape)
+    print("data.dtype", data.dtype)
+    print("data min max", np.min(data), np.max(data))
+
+    if args.eight:
+        print("adjusting data offset")
+        data = data.astype(np.int16)
+        data -= 128
+        print("data.min", np.min(data))
+        
     seqs = []
     si = 0 # sample index
+    incr = rate/10 # 1/10th second
+    print("incr", incr)
     while si < data.shape[0]:
         # print("si = %d" % si)
         # incr = int(np.random.normal(1000, 50))
-        incr = 4410 # 1/10th second
         # check
         if incr < 100:
             print("too short %d" % incr)
@@ -73,8 +85,9 @@ def main_stereo(args):
             si += incr
             continue
         
-        seq = np.zeros((incr, 2))
-        seq[:,:] = data[si:si+incr]
+        seq = np.zeros((incr, 2), dtype=np.int16)
+        seq[:,:] = data[si:si+incr].astype(np.int16)
+        # print("seq.dtype", seq.dtype, seq)
         # seq[-1,2] = 1 # end of stroke
         seqs.append(seq.copy())
     
@@ -86,7 +99,9 @@ def main_stereo(args):
     f = open("%s.cpkl" % dfile,"wb")
     cPickle.dump(seqs, f, protocol=2)
     f.close()
-    
+
+# def main_8bit():
+        
 def main(args):
     if args.mode == "mono":
         main_mono(args)
@@ -95,9 +110,10 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--mode", default="mono", help="Mode: mono, stereo")
+    parser.add_argument("-m", "--mode", default="mono", help="Mode: mono, stereo, 8bit")
     parser.add_argument("-f", "--file", default="drinksonus", help="wavfile to convert: [drinksonus]")
+    parser.add_argument("-8", "--eight", action="store_true", help="8bit data", dest="eight")
 
     args = parser.parse_args()
-
+    print(args)
     main(args)

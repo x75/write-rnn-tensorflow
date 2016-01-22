@@ -54,6 +54,7 @@ def sample_stroke():
   return [strokes, params]
 
 def sample_waves():
+  print("starting to sample")
   [strokes, params] = model.sample(sess, sample_args.sample_length)
   # [strokes, params] = model.sample_seeded(sess, sample_args.sample_length)
   return [strokes, params]
@@ -68,4 +69,6 @@ print(np.max(strokes[:,0:2]), np.min(strokes[:,0:2]))
 # wavfile.write("explorers_MP3WRAP_sample.wav", 44100, strokes[:,0:2]/65535.)
 wavname = "notypeinst_sample_%s.wav" % (time.strftime("%Y%m%d-%H%M%S"))
 print "saving %s" % wavname
-wavfile.write(wavname, 44100, strokes[:,0:2]/sample_args.scale_factor)
+# wavfile.write(wavname, 44100, strokes[:,0:2]/sample_args.scale_factor)
+wavdata = ((128*strokes[:,0:2]/np.max(strokes))+128).astype(np.uint8)
+wavfile.write(wavname, 22050, wavdata)
