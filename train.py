@@ -103,6 +103,8 @@ def train(args):
                     checkpoint_path = os.path.join('save', 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
+                    np.save("save/train_losses.npy", np.asarray(train_losses))
+        pl.title("write-rnn-tf: train losses")
         pl.plot(train_losses)
         pl.show()
         np.save("save/train_losses.npy", np.asarray(train_losses))

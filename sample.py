@@ -31,8 +31,8 @@ sample_args = parser.parse_args()
 with open(os.path.join('save', 'config.pkl')) as f:
     saved_args = cPickle.load(f)
 
-# model = Model(saved_args, True)
-model = Model2Df(saved_args, True)
+model = Model(saved_args, True)
+# model = Model2Df(saved_args, True)
 sess = tf.InteractiveSession()
 saver = tf.train.Saver(tf.all_variables())
 

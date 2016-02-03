@@ -8,23 +8,45 @@ import random
 class Model():
   def __init__(self, args, infer=False):
     self.args = args
+
+    self.dim = 3
+    
     if infer:
       args.batch_size = 1
       args.seq_length = 1
 
+    # set cell creation func according to "model" argument
     if args.model == 'rnn':
       cell_fn = rnn_cell.BasicRNNCell
     elif args.model == 'gru':
       cell_fn = rnn_cell.GRUCell
     elif args.model == 'lstm':
       cell_fn = rnn_cell.BasicLSTMCell
-      # cell_fn = rnn_cell.LSTMCell
+    elif args.model == "lstmp":
+      cell_fn = rnn_cell.LSTMCell
+    elif args.model == "cw":
+      cell_fn = rnn_cell.CWRNNCell
     else:
       raise Exception("model type not supported: {}".format(args.model))
+  
+      # handle some special cases for cell creation func
+    if args.model == "lstmp":
+      cell = cell_fn(args.rnn_size, self.dim, use_peepholes=True, num_proj=args.rnn_size)
+      if args.num_layers > 1:
+        cell1 = cell_fn(args.rnn_size, args.rnn_size, use_peepholes=True, num_proj=args.rnn_size)
+    elif args.model == "lstm":
+      cell = cell_fn(args.rnn_size, forget_bias = 5.0)
+    elif args.model == "cw":
+      # cell = cell_fn(args.rnn_size, [1, 4, 16, 64])
+      cell = cell_fn(args.rnn_size, [1, 4, 16, 64, 128, 256])
+    else:
+      cell = cell_fn(args.rnn_size)
 
-    cell = cell_fn(args.rnn_size)
-
-    cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
+    # handle multilayer special case for lstmp
+    if args.num_layers > 1 and args.model == "lstmp":
+      cell = rnn_cell.MultiRNNCell([cell] + [cell1] * args.num_layers)
+    else:
+      cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
 
     if (infer == False and args.keep_prob < 1): # training mode
       cell = rnn_cell.DropoutWrapper(cell, output_keep_prob = args.keep_prob)

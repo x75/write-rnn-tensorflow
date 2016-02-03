@@ -17,12 +17,19 @@ def main_mono(args):
 
     print("rate", rate, "data.shape", data.shape)
 
+    if args.eight:
+        print("adjusting data offset")
+        data = data.astype(np.int16)
+        data -= 128
+        print("data.min", np.min(data))
+        
     seqs = []
     si = 0 # sample index
     incr = rate/10
     while si < data.shape[0]:
         # print("si = %d" % si)
         # incr = int(np.random.normal(1000, 50))
+        incr = int(np.random.uniform(300, 800))
         # check
         if incr < 100:
             print("too short %d" % incr)
