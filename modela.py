@@ -69,8 +69,8 @@ class Model2Df(): # two-dimensional data (stereo), float
     inputs = tf.split(1, args.seq_length, self.input_data)
     inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
-    outputs, states = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=None, scope='rnnlm')
-    # outputs, states = rnn.rnn(cell, inputs, self.initial_state, sequence_length = args.seq_length, scope='rnnlm')
+    # outputs, states = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=None, scope='rnnlm')
+    outputs, states = rnn.rnn(cell, inputs, self.initial_state, scope='rnnlm')
     output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
     output = tf.nn.xw_plus_b(output, output_w, output_b)
     self.final_state = states[-1]
